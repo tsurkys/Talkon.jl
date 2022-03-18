@@ -1,0 +1,13 @@
+name = "Talkon"
+authors = ["<TBD>"]
+uuid = "cf90de9e-ecfd-43df-a09c-d6a26c9799bd"
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+ReTest = "e0db7c4e-2690-44b9-bad6-7687da720f89"
+
+[targets]
+test = ["ReTest"]

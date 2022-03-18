@@ -1,0 +1,3 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Talkon = "cf90de9e-ecfd-43df-a09c-d6a26c9799bd"

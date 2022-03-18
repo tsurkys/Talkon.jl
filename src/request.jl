@@ -54,6 +54,7 @@ function trequest() # participant iniciates a request
         sendMessage(chat_id = av["id"], text = msg, reply_markup = d)           
     end
 end
+
 function sendrequest() # the request is broadcasted
     keis=K[av["requestid"]]
     if length(keis["requested_id"])==length(keis["dav_id"])
@@ -78,6 +79,7 @@ function sendrequest() # the request is broadcasted
         end
     end
 end
+
 function dealkeis(Av,av,K)
     if av["txt"]=="Priimti"
         avg=Av[av["getterid"]] 
@@ -108,6 +110,7 @@ function dealkeis(Av,av,K)
         tbegin()
     end
 end
+
 function chekeis()
     global av
     n=now()
@@ -129,6 +132,7 @@ function chekeis()
         end        
     end
 end
+
 function closekeis(k)
     global av
     keis=K[k]
@@ -168,5 +172,4 @@ function closekeis(k)
         # k=[["Į pradžią", "tbegin()"]]
         # sendMessage(chat_id = gid, text = msg, reply_markup = tik(k))
     end
-
 end
