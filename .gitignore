@@ -1,0 +1,7 @@
+*.jl.*.cov
+*.jl.cov
+*.jl.mem
+*.pem
+.env
+Manifest.toml
+/docs/build/

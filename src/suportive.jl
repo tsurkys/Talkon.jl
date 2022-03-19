@@ -1,5 +1,3 @@
-using Telegram, Telegram.API, Serialization, Dates, Revise
-
 function tree(av,T)
     if av["txt"]=="Atgal" 
         if av["path"][end]=="0" 
@@ -42,6 +40,7 @@ function tree(av,T)
     d=Dict(:keyboard => ktree, :one_time_keyboard => true, :resize_keyboard=>true)
     sendMessage(chat_id = av["id"], text = msg, reply_markup = d)
 end
+
 function maketree()
     mtxt=readlines("medis.txt",keep=false)
     steps=["0"]
@@ -76,6 +75,7 @@ function maketree()
     end
     return T
 end
+
 function kas2nkas(name)
     d=Dict("as"=>"ai",'ė'=>"e","us"=>"au","ys"=>"y","is"=>"i","inkas"=>"inke")
     if length(name)>5 && haskey(d,name[end-4:end])
@@ -88,6 +88,7 @@ function kas2nkas(name)
         nname=name
     end
 end
+
 function tik(k) #talka inline keyboard
     kb=[]
     for ki in k
@@ -100,6 +101,7 @@ function tik(k) #talka inline keyboard
     d=Dict(:inline_keyboard => kb)
     return d
 end
+
 function getgroup(groups)
     for group in groups
         if group.second["state"]=="free"
@@ -108,9 +110,11 @@ function getgroup(groups)
     end
     print("not enought free rooms")
 end
+
 function taskai()
     sendMessage(chat_id = av["id"], text = "Jūsų taškų skaičius $(round(10*av["token"])/10)")
 end
+
 function cleanK()
     datafile="varTEST.jl"
     #datafile="ss1.jl"
@@ -119,6 +123,7 @@ function cleanK()
     K=Dict(now()=>Dict("getter"=>Av[5090964479],"txt"=>"refresh","giver"=>[1],"state"=>"nothing"))
     serialize(datafile,[T,Av,updateId,K,groups])
 end
+
 function cleanT()
     datafile="varTEST.jl"
     #datafile="ss1.jl"
@@ -127,9 +132,9 @@ function cleanT()
     for t in T
         v=[]
         for i in 1:length(t.second["dav_id"])
-           if !any(ak.==t.second["dav_id"][i])
+            if !any(ak.==t.second["dav_id"][i])
                 push!(v,i)
-           end
+            end
         end
         deleteat!(t.second["dav_id"],v)
         t.second["dav_id"]=union(t.second["dav_id"])
@@ -137,8 +142,3 @@ function cleanT()
     serialize(datafile,[T,Av,updateId,K,groups])
     print("T išvalytas2")
 end
-#cleanK()
-#T=maketree()
-# groups=Dict(-791082915=>Dict("state"=>"free","link"=>"https://t.me/+AB2HqKYZPhM4MTY0"),
-# -783583956=>Dict("state"=>"free","link"=>"https://t.me/+TW6nKtFlNmUzYWZk"),
-# -642628108=>Dict("state"=>"free","link"=>"https://t.me/+w9Rv7qTX9jw3N2E8"))

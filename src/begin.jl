@@ -1,9 +1,8 @@
-using Telegram, Telegram.API
 function newav(ms)
     global av
     fromId=ms["message"]["from"]["id"]
     Av[fromId]=Dict("first_name"=>ms["message"]["from"]["first_name"],
-    "token"=>4,"step"=>"00","id"=>fromId)
+                    "token"=>4,"step"=>"00","id"=>fromId)
     if haskey(ms["message"]["from"],"last_name")
         Av[fromId]["last_name"]=ms["message"]["from"]["last_name"]
     end
@@ -18,6 +17,7 @@ function newav(ms)
     keyboard=[["Taip","invitecodeyesno(1)","Ne","invitecodeyesno(0)"]]
     sendMessage(chat_id = fromId,text = "Ar turite pakvietimo kodą?",reply_markup = tik(keyboard))
 end
+
 function tbegin()
     av["step"]="0"
     av["path"]=["0"]
@@ -25,6 +25,7 @@ function tbegin()
     msg="Galite klausti bendruomenės klausimą arba žymėti sritis kuriose turite išmanymą."
     sendMessage(chat_id = av["id"], text = msg, reply_markup = tik(keyboard))
 end
+
 function invite()
     msg="Nusiūskite žmogui nuorodą bei kodą (jei reikia, pirmiausia pakviestkite į Telegram platformą)."
     sendMessage(chat_id = av["id"],text = msg)
@@ -32,11 +33,13 @@ function invite()
     sendMessage(chat_id = av["id"],text = msg)
     sendMessage(chat_id = av["id"],text = "$(av["id"])")
 end
+
 function welcometext()
     txt="""Kol dirbtinis intelektas mokosi žmogiškai kalbėti, geriausias būdas surasti atsakymus - pokalbis su gyvu žmogumi. Ši priemonė skirta padėti suvesti klausiantįjį su žinančiu. Svarbus aspektas šios priemonės surinkti ir suskirstyti mūsų žinias ir gebėjimus, todėl kai suformuluosite klausimą, tą klausimą reiks priskirti sričiai iš sričių medžio tam, kad klausimas nukeliautų pas išmanantį žmogų. Kai norėsite prisidėti sprendžiant kitų klausimus, taip pat reikės pasirinkti sritis, kur jūs turite išmanymą. Jei vaikščiojimas po sričių medį pasirodys nepatrauklus, yra alternatyva - išsikviesti nedidelę paslaugėlę ir paprašyti parinkt tinkamą sritį. Galite nuo to ir pradėti.
     Kai prisijungsite prie Talkos jūsų piniginėje bus keturi taškai. Kiekvieną kartą kai kviesite pagalbą  jūs talkininkams sumokėsite tašką. O kai jūs dalyvausite kito talkoje, jūs irgi gausite dalį to taško. Beje, visose talkose dalyvaus "Talkininkas" kurio užduotis kurti ir prižiūrėti šią priemonę, jis irgi gaus dalį taško. 
     Jei netyčia nežinojote, tai robotukas Talka, dar labai labai jaunas, todėl prašom būt atlaidiems. Nuo mūsų visų priklausys ar jis gyvuos ir koks jis užaugs!"""
 end
+
 function invitecodeyesno(t)
     if t==0
         tbegin()
@@ -45,6 +48,7 @@ function invitecodeyesno(t)
     sendMessage(chat_id = av["id"], text = "Įveskite kodą")
     av["step"]="wait_for_invite_code"
 end
+
 function registerinvitecode()
     id=tryparse(Int, av["txt"])
     if id !== nothing && any(keys(Av).==id)
