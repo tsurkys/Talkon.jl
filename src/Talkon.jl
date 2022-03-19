@@ -56,22 +56,22 @@ function dothing(tg, updateId)
     mst=try
         getUpdates(tg,offset=updateId+1,allowed_updates=["message","callback_query"])
     catch
-        @warn "getUpdates neveikia, gal nėra interneto?!"
+        @warn "getUpdates doesnt work may be no connection?!"
         sleep(2)
         return
     end
     if length(mst)>1
-        print("ilgis žinutės $(length(mst))")
+        print("length of the message $(length(mst))")
     elseif length(mst) == 0
         sleep(1)
         return updateId
     end
     updateId=mst[end]["update_id"]
     for ms in mst
-        if haskey(ms,"callback_query")
+        if haskey(ms,"callback_query") #messages that have callback string
             id=ms["callback_query"]["from"]["id"]
             av=Av[id]
-            av["txt"]="niekaliauskas"
+            av["txt"]="nothingness"
             switcher(ms[:callback_query][:data])
             #eval(Meta.parse(ms[:callback_query][:data]))
             chat_id=ms["callback_query"]["message"]["chat"]["id"]
@@ -81,40 +81,40 @@ function dothing(tg, updateId)
             end
             continue
         elseif haskey(ms["message"],"new_chat_member")
-            if ms["message"]["chat"]["id"]==-1001547960563 #new main group member
-                if !haskey(Av,ms["message"]["new_chat_member"]["id"])
-                    newav(ms)
+            if ms["message"]["chat"]["id"]==-1001547960563 #message from main group
+                if !haskey(Av,ms["message"]["new_chat_member"]["id"])#new member entered main group 
+                    newav(ms) # register and wellcome message for a new member
                 end
                 continue
             end
-            promoteChatMember(chat_id=ms["message"]["chat"]["id"], #new member in temporary group
+            promoteChatMember(chat_id=ms["message"]["chat"]["id"], #new member entered the temporary group
                               user_id=ms["message"]["new_chat_member"]["id"],can_manage_voice_chats=true)
             continue
         elseif !haskey(ms["message"],"text")
-            println("nestandartinė žinutė")
+            println("unknown type of message")
             continue
         end
-        if !haskey(Av,ms["message"]["from"]["id"])
+        if !haskey(Av,ms["message"]["from"]["id"]) #new member called bot 
             newav(ms)
             continue
         end
         av=Av[ms["message"]["from"]["id"]]
         ReplyKeyboardRemove=Dict(:remove_keyboard=>true)
-        sentms=sendMessage(chat_id = av["id"], text = "įvesta", reply_markup = ReplyKeyboardRemove)   
-        deleteMessage(chat_id=av["id"],message_id=sentms["message_id"])
-        if ms["message"]["text"][end] == '✓'
+        sentms=sendMessage(chat_id = av["id"], text = "entered", reply_markup = ReplyKeyboardRemove)  # sendMessage always require text message,
+        deleteMessage(chat_id=av["id"],message_id=sentms["message_id"]) # in this case it has to be deleted
+        if ms["message"]["text"][end] == '✓' # curently tree is represented not with inline keyboard, thus the text message arrives
             av["txt"] = ms["message"]["text"][1:end-1]
         else
             av["txt"] = ms["message"]["text"]
         end
-        if lowercase(av["txt"]) == "namo" || av["txt"] == "/start" || av["txt"] == "/namo"
+        if lowercase(av["txt"]) == "home" || av["txt"] == "/start" || av["txt"] == "/namo"
             tbegin()
-        elseif av["txt"]=="/pakviesti"
-            invite()
-        elseif av["txt"]=="/taskai"
-            taskai()
-        elseif av["step"]=="wait_for_invite_code"
-            registerinvitecode()
+        #elseif av["txt"]=="/pakviesti" #invite new member, perhaps to help refugees it is not very usefull
+        #    invite()
+        #elseif av["txt"]=="/taskai"
+        #    taskai()
+        #elseif av["step"]=="wait_for_invite_code"
+        #    registerinvitecode()
         elseif av["step"] == "request"
             trequest()
         elseif av["step"] == "enter"
