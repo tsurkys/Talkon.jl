@@ -116,18 +116,17 @@ function taskai()
 end
 
 function cleanK()
-    datafile="varTEST.jl"
     #datafile="ss1.jl"
-    (T,Av,updateId,K,groups)=deserialize(datafile)
+    (T, Av, updateId, K, groups) = deserialize(DATAFILE[])
     collect(keys(K))
-    K=Dict(now()=>Dict("getter"=>Av[5090964479],"txt"=>"refresh","giver"=>[1],"state"=>"nothing"))
-    serialize(datafile,[T,Av,updateId,K,groups])
+    K = Dict(now() => Dict("getter" => Av[5090964479], "txt"=>"refresh", 
+                           "giver"=>[1], "state"=>"nothing"))
+    serialize(DATAFILE[], [T, Av, updateId, K, groups])
 end
 
 function cleanT()
-    datafile="varTEST.jl"
     #datafile="ss1.jl"
-    (T,Av,updateId,K,groups)=deserialize(datafile)
+    (T,Av,updateId,K,groups) = deserialize(DATAFILE[])
     ak=keys(Av)
     for t in T
         v=[]
@@ -139,6 +138,6 @@ function cleanT()
         deleteat!(t.second["dav_id"],v)
         t.second["dav_id"]=union(t.second["dav_id"])
     end
-    serialize(datafile,[T,Av,updateId,K,groups])
+    serialize(DATAFILE[], [T,Av,updateId,K,groups])
     print("T išvalytas2")
 end

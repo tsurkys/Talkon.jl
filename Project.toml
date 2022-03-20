@@ -1,7 +1,12 @@
 name = "Talkon"
-authors = ["<TBD>"]
 uuid = "cf90de9e-ecfd-43df-a09c-d6a26c9799bd"
+authors = ["<TBD>"]
 version = "0.1.0"
+
+[deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+Telegram = "1da6f4ae-116c-4c38-8ee9-19974ff3601d"
 
 [compat]
 julia = "1"
