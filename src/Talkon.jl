@@ -11,14 +11,18 @@ include("enter.jl")
 include("quality.jl")
 include("suportive.jl")
 
-export talka
+export talka, initialize
 
-datafile="varTEST.jl"
-#datafile="ss1.jl"
-(T,Av,updateId,K,groups)=deserialize(datafile)
-#delete!(Av,5001426828) Tadas
-#delete!(Av,5090964479)# Vecmaminia
-updateId=1
+const DATAFILE = Ref("")
+
+function initialize(datafile = "varTEST.data")
+    DATAFILE[] = datafile
+    global T, Av, updateId, K, groups
+    #datafile="ss1.jl"
+    (T,Av,updateId,K,groups)=deserialize(datafile)
+    #delete!(Av,5001426828) Tadas
+    #delete!(Av,5090964479)# Vecmaminia
+end
 
 function talka(updateId)
     tg=TelegramClient()
@@ -123,7 +127,7 @@ function dothing(tg, updateId)
             dealkeis(Av,av,K)
         end
     end # end of for ms
-    serialize(datafile,[T,Av,updateId,K,groups])
+    serialize(DATAFILE[], [T,Av,updateId,K,groups])
     return updateId
 end # end of dothing function
 
