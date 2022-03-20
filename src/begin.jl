@@ -1,30 +1,33 @@
-function newav(ms)
-    global av
-    fromId=ms["message"]["from"]["id"]
-    Av[fromId]=Dict("first_name"=>ms["message"]["from"]["first_name"],
-                    "token"=>4,"step"=>"00","id"=>fromId)
+function newav(d::DataBase, tg, av, ms)
+    @unpack T, Av, K, groups = d
+    from_id = ms["message"]["from"]["id"]
+    Av[from_id] = Dict("first_name" => ms["message"]["from"]["first_name"],
+                      "token" => 4, "step" => "00", "id" => from_id)
     if haskey(ms["message"]["from"],"last_name")
-        Av[fromId]["last_name"]=ms["message"]["from"]["last_name"]
+        Av[from_id]["last_name"] = ms["message"]["from"]["last_name"]
     end
-    av=Av[fromId]
+    av = Av[from_id]
     for pathkey in keys(T)
         push!(T[pathkey]["dav_id"],av["id"])
     end
     println(string("Užsiregistravo avėjas: ", av["first_name"]))
-    msg=string("Sveiki/Здравствуйте, ",kas2nkas(av["first_name"]),"! Esu robotas Talkon. Aš padedu kaip taksi išsikviesti (arba suteikti) pagalbą./Я робот Talkon. Я допомагаю як таксі викликати (або надати) допомогу./Я робот Талкон. Помогаю как такси вызвать (или оказать) помощь.")
-    sendMessage(chat_id = fromId,text = msg)
-    sendMessage(chat_id = fromId,text = welcometext())
-    tbegin()
-    #keyboard=[["Taip","invitecodeyesno(1)","Ne","invitecodeyesno(0)"]]
-    #sendMessage(chat_id = fromId,text = "Ar turite pakvietimo kodą?",reply_markup = tik(keyboard))
+    msg = string("Sveiki/Здравствуйте, ", kas2nkas(av["first_name"]), "! Esu robotas Talkon. Aš padedu kaip taksi išsikviesti (arba suteikti) pagalbą./Я робот Talkon. Я допомагаю як таксі викликати (або надати) допомогу./Я робот Талкон. Помогаю как такси вызвать (или оказать) помощь.")
+    sendMessage(tg, chat_id = from_id, text = msg)
+    sendMessage(tg, chat_id = from_id, text = welcometext())
+    tbegin(tg, av)
+    #keyboard = [["Taip","invitecodeyesno(1)","Ne","invitecodeyesno(0)"]]
+    #sendMessage(chat_id = from_id,text = "Ar turite pakvietimo kodą?",reply_markup = tik(keyboard))
+    return av
 end
 
-function tbegin()
-    av["step"]="0"
-    av["path"]=["0"]
-    msg="Galite klausti ir prašyti pagalbos arba jei galite suteikti pagalbą žymėti sritis kuriose galite pagelbėti./Ви можете попросити і попросити про допомогу або, якщо ви можете надати допомогу, позначити місця, де ви можете допомогти."
-    keyboard=[["Klausti/Спитати/Спросить","trequest()","Žymėti/Позначте/Отметить","tenter()"]]
-    sendMessage(chat_id = av["id"], text = msg, reply_markup = tik(keyboard))
+function tbegin(tg, av)
+    av["step"] = "0"
+    av["path"] = ["0"]
+    msg = "Galite klausti ir prašyti pagalbos arba jei galite suteikti pagalbą žymėti sritis kuriose galite pagelbėti./Ви можете попросити і попросити про допомогу або, якщо ви можете надати допомогу, позначити місця, де ви можете допомогти."
+    keyboard = [["Klausti/Спитати/Спросить", "trequest()", "Žymėti/Позначте/Отметить", "tenter()"]]
+    sendMessage(tg, chat_id = av["id"], text = msg, reply_markup = tik(keyboard))
+
+    return
 end
 
 function welcometext()
