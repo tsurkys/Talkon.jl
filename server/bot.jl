@@ -3,5 +3,5 @@ using ConfigEnv
 
 dotenv()
 
-initialize("varTEST.data")
-talka(1)
+db = initialize("varTEST.data")
+talka(db)

@@ -3,5 +3,6 @@
 *.jl.mem
 *.pem
 .env
+misc/
 Manifest.toml
 /docs/build/
