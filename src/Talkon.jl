@@ -30,7 +30,6 @@ end
 
 function talka(d::DataBase)
     update_id = d.update_id
-    tg = TelegramClient("5228841059:AAHWYzBFbqM4TFYgURvmNRqc25dDywOlLJA")
     av = nothing
     for i in 1:50
         update_id, av = dothing(d, tg, update_id, av)
@@ -138,5 +137,3 @@ function dothing(d::DataBase, tg, update_id, av)
 end # end of dothing function
 
 end # module
-d=Talkon.initialize("C:\\Users\\tadas\\OneDrive\\CSS\\ghabas\\Talkon.jl\\server\\varTEST.data")
-Talkon.talka(d)
