@@ -31,11 +31,15 @@ end
 function talka(d::DataBase)
     update_id = d.update_id
     av = nothing
-    for i in 1:50
+    tg = TelegramClient()
+    cnt = 0
+    while true
+        cnt += 1
         update_id, av = dothing(d, tg, update_id, av)
         d.update_id = update_id
-        if round(i/20)-i/20 == 0
+        if cnt == 20
             av = chekeis(d, tg, av)
+            cnt = 0
         end
     end
 end # end of talka function
