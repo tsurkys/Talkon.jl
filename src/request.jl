@@ -63,7 +63,7 @@ function sendrequest(d::DataBase, tg, av) # the request is broadcasted
 
     keis = K[av["requestid"]]
     if length(keis["requested_id"]) == length(keis["dav_id"])
-        msg = """Pakartotinas užklausimas "$(keis["txt"])" iš $(keis["subject"]) temos. Gal pažįstat kas gali atsakyti į šį klausimą?"""
+        msg = """Pakartotinas užklausimas "$(keis["txt"])" iš "$(keis["subject"])" temos. Gal pažįstat kas gali atsakyti į šį klausimą?"""
         keis["requested_id"] = []
     else
         msg = """Užklausimas "$(keis["txt"])" iš $(keis["subject"]) temos"""

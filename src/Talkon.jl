@@ -29,9 +29,10 @@ function initialize(datafile = "varTEST.data")
 end
 
 function talka(d::DataBase)
+    tg=TelegramClient("5228841059:AAHWYzBFbqM4TFYgURvmNRqc25dDywOlLJA")
     update_id = d.update_id
     av = nothing
-    for i in 1:50
+    for i in 1:1000
         update_id, av = dothing(d, tg, update_id, av)
         d.update_id = update_id
         if round(i/20)-i/20 == 0
@@ -93,10 +94,14 @@ function dothing(d::DataBase, tg, update_id, av)
             end
             continue
         elseif haskey(ms["message"], "new_chat_member") 
-            if ms["message"]["chat"]["id"] ==-1001715161879# development group. https://t.me/talkon_development
-            #if ms["message"]["chat"]["id"] == -1001547960563 #message from main test group https://t.me/talka_ukrainai
-                if !haskey(Av, ms["message"]["new_chat_member"]["id"])#new member entered main group 
+            #if ms["message"]["chat"]["id"] ==-1001715161879# development group. https://t.me/talkon_development
+            if ms["message"]["chat"]["id"] == -1001547960563 #message from main test group https://t.me/talka_ukrainai
+                if !haskey(Av, ms["message"]["new_chat_member"]["id"]) # new member entered main group 
+                    try
                     av = newav(d, tg, av, ms) # register and wellcome message for a new member
+                    catch
+                        println("unsuccesfull registration upon entering main group")
+                    end
                 end
                 continue
             end
