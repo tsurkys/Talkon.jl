@@ -10,7 +10,7 @@ function newav(d::DataBase, tg, av, ms)
     for pathkey in keys(T)
         push!(T[pathkey]["dav_id"],av["id"])
     end
-    println(string("Užsiregistravo avėjas: ", av["first_name"]))
+    println(string("Registered new member: ", av["first_name"]))
     msg = string("Sveiki/Здравствуйте, ", kas2nkas(av["first_name"]), "! Esu robotas Talkon. Aš padedu kaip taksi išsikviesti (arba suteikti) pagalbą./Я робот Talkon. Я допомагаю як таксі викликати (або надати) допомогу./Я робот Талкон. Помогаю как такси вызвать (или оказать) помощь.")
     sendMessage(tg, chat_id = from_id, text = msg)
     sendMessage(tg, chat_id = from_id, text = welcometext())

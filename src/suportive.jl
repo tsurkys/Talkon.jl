@@ -1,7 +1,7 @@
 function tree(tg, av, T)
-    if av["txt"] == "Atgal"
+    if av["txt"] == "Atgal | Повернутися"
         if av["path"][end] == "0"
-            tbegin()
+            tbegin(tg, av)
             return
         else
             av["path"] = av["path"][1:end-1]
@@ -13,7 +13,7 @@ function tree(tg, av, T)
     ktree = [[]]
     for i in 1:length(ch)
         if any(T[string(pathkey,ch[i])]["dav_id"] .== av["id"])
-            push!(children,string(ch[i],"✓"))# būtų gerai leisti užsidėti ir kelias žvaigždutes?
+            push!(children,string(ch[i],"✓"))
         else
             push!(children,ch[i])
         end
@@ -26,9 +26,9 @@ function tree(tg, av, T)
         end
     end
     if any(T[pathkey]["dav_id"] .== av["id"]) && av["step"] == "enter"
-        push!(ktree,["Atgal","Nuimti žymę","Namo"])
+        push!(ktree,["Atgal | Повернутися","Nuimti žymę","Namo | Додому"])
     else
-        push!(ktree,["Atgal","Pasirinkti","Namo"])
+        push!(ktree,["Atgal | Повернутися","Pasirinkti","Namo | Додому"])
     end
     popfirst!(ktree)
     if length(ktree) > 1

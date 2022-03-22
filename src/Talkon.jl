@@ -5,6 +5,7 @@ using Telegram.API
 using Serialization
 using UnPack
 using Dates
+using Random
 
 include("database.jl")
 include("begin.jl")
@@ -19,16 +20,19 @@ const DATAFILE = Ref("")
 
 function initialize(datafile = "varTEST.data")
     DATAFILE[] = datafile
-    (T, Av, updateId, K, groups) = deserialize(datafile)
-
-    return DataBase(T, Av, updateId, K, groups)
+    (T, Av, update_id, K, groups) = deserialize(datafile)
+    #delete!(Av,5001426828) # Tadas
+    #delete!(Av,1288201725) # Vidas
+    #delete!(Av,105485706) # Andrey
+    #delete!(Av,5090964479) # Talkininkas
+    return DataBase(T, Av, update_id, K, groups)
 end
 
 function talka(d::DataBase)
     update_id = d.update_id
-    tg = TelegramClient()
+    tg = TelegramClient("5228841059:AAHWYzBFbqM4TFYgURvmNRqc25dDywOlLJA")
     av = nothing
-    for i in 1:250
+    for i in 1:50
         update_id, av = dothing(d, tg, update_id, av)
         d.update_id = update_id
         if round(i/20)-i/20 == 0
@@ -54,7 +58,7 @@ function switcher(d, tg, av, inp)
         av = closekeis(d, tg, av, av["requestid"])
     elseif inp == ""
     else
-        println("netinkama komanda!")
+        println("bad command!")
     end
 
     return av
@@ -89,8 +93,9 @@ function dothing(d::DataBase, tg, update_id, av)
             catch
             end
             continue
-        elseif haskey(ms["message"], "new_chat_member")
-            if ms["message"]["chat"]["id"] == -1001547960563 #message from main group
+        elseif haskey(ms["message"], "new_chat_member") 
+            if ms["message"]["chat"]["id"] ==-1001715161879# development group. https://t.me/talkon_development
+            #if ms["message"]["chat"]["id"] == -1001547960563 #message from main test group https://t.me/talka_ukrainai
                 if !haskey(Av, ms["message"]["new_chat_member"]["id"])#new member entered main group 
                     av = newav(d, tg, av, ms) # register and wellcome message for a new member
                 end
@@ -111,12 +116,8 @@ function dothing(d::DataBase, tg, update_id, av)
         ReplyKeyboardRemove = Dict(:remove_keyboard => true)
         sentms = sendMessage(chat_id = av["id"], text = "entered", reply_markup = ReplyKeyboardRemove)  # sendMessage always require text message,
         deleteMessage(chat_id = av["id"],message_id = sentms["message_id"]) # in this case it has to be deleted
-        if ms["message"]["text"][end] == '✓' # curently tree is represented not with inline keyboard, thus the text message arrives
-            av["txt"] = ms["message"]["text"][1:end-1]
-        else
-            av["txt"] = ms["message"]["text"]
-        end
-        if lowercase(av["txt"]) == "home" || av["txt"] == "/start" || av["txt"] == "/namo"
+        av["txt"]=replace(ms["message"]["text"],"✓"=>"") # curently tree is represented not with inline keyboard, thus the text message arrives
+        if lowercase(av["txt"]) == "namo | додому" || av["txt"] == "/start" || av["txt"] == "/namo"
             tbegin(tg, av)
         #elseif av["txt"] == "/pakviesti" #invite new member, perhaps to help refugees it is not very usefull
         #    invite()
@@ -137,3 +138,5 @@ function dothing(d::DataBase, tg, update_id, av)
 end # end of dothing function
 
 end # module
+d=Talkon.initialize("C:\\Users\\tadas\\OneDrive\\CSS\\ghabas\\Talkon.jl\\server\\varTEST.data")
+Talkon.talka(d)
