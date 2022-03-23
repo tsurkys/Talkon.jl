@@ -22,20 +22,20 @@ function trequest(d, tg, av) # participant iniciates a request
         tree(tg, av, T)
     elseif av["txt"] == "Pasirinkti" || av["txt"] == "Siųsti | Відправити"
         if av["txt"] == "Siųsti | Відправити"
-            #keypath = "0PaslaugėlėsKita"
+            keypath = "0Paslaugos | Послуги "
         else
             while isempty(T[keypath]["dav_id"])
                 if length(T[keypath]["steps"])<2
-                    #keypath = "0PaslaugėlėsKita"
+                    keypath = "0Paslaugos | Послуги "
                     break
                 else
                     keypath = join(T[keypath]["steps"][1:end-1])
                 end
             end
         end
-        msg = "Lukterėkite, tuoj surasiu talkininką."
+        msg = "Lukterėkite, tuoj surasiu talkininką. | Зачекайте, я скоро знайду помічника."
         sendMessage(tg, chat_id = av["id"], text = msg)
-        # TODO: redundant keis?
+        # TODO: redundant keis? Do not understand the question
         keis = K[av["requestid"]]
         subject = join(av["path"][2:end], "/")
         if isempty(subject)
@@ -51,7 +51,7 @@ function trequest(d, tg, av) # participant iniciates a request
     else #įvedamas užklausimo tekstas
         av["requestid"] = now()
         K[av["requestid"]] = Dict("getter"=>av,"txt"=>deepcopy(av["txt"]),"giver"=>[],"state"=>"opened")
-        msg = "Siūskite užklausimą iškart (kainuos papildomą tašką:) arba pasirinkite iš kurios srities klausimas"
+        msg = "Siūskite užklausimą iškart arba pasirinkite iš kurios srities klausimas. | Надішліть запит негайно або виберіть, з якої області запитати."
         k = [["Siųsti | Відправити","Parinkti | Виберіть"]]
         d = Dict(:keyboard => k, :one_time_keyboard => true, :resize_keyboard=>true)
         sendMessage(tg, chat_id = av["id"], text = msg, reply_markup = d)
@@ -63,7 +63,7 @@ function sendrequest(d::DataBase, tg, av) # the request is broadcasted
 
     keis = K[av["requestid"]]
     if length(keis["requested_id"]) == length(keis["dav_id"])
-        msg = """Pakartotinas užklausimas "$(keis["txt"])" iš $(keis["subject"]) temos. Gal pažįstat kas gali atsakyti į šį klausimą?"""
+        msg = """Pakartotinas užklausimas "$(keis["txt"])" iš "$(keis["subject"])" temos. Gal pažįstat kas gali atsakyti į šį klausimą?"""
         keis["requested_id"] = []
     else
         msg = """Užklausimas "$(keis["txt"])" iš $(keis["subject"]) temos"""
@@ -98,22 +98,22 @@ function dealkeis(d, tg, av)
         if avg["step"] == "request"
             keis["group"] = getgroup(groups)
             keis["group"].second["state"] = "notfree"
-            msg = "Aptarkit klausimą prisijungus prie grupės: $(keis["group"].second["link"])"
+            msg = "Aptarkit klausimą prisijungus prie grupės: | Обговоріть проблему, приєднавшись до групи:  $(keis["group"].second["link"])"
             sendMessage(chat_id = av["getterid"], text = msg)
             avg["step"] = "accepted"
-            msg = "Atėjus laikui uždarykite klausimą."
-            keyboard = [["Uždaryti klausimą","closekeis()"]]
+            msg = "Atėjus laikui uždarykite klausimą. | Закрийте питання, коли прийде час."
+            keyboard = [["Uždaryti klausimą | Закрийте питання","closekeis()"]]
             #sendMessage(chat_id = keis["group"].first, text = msg, reply_markup = tik(keyboard)) # the bottum could be also in a group (at present is too complicated)
             sendMessage(tg, chat_id = avg["id"], text = msg, reply_markup = tik(keyboard))
             if avg["id"] !== 5090964479 # if not owner of the group
                 unbanChatMember(tg, chat_id = keis["group"].first, user_id = avg["id"])
             end
         end
-        msg = "Aptarkit klausimą prisijungus prie grupės: $(keis["group"].second["link"])"
+        msg = "Aptarkit klausimą prisijungus prie grupės | Обговоріть проблему, приєднавшись до групи: $(keis["group"].second["link"])"
         sendMessage(chat_id = av["id"], text = msg)
         push!(keis["giver"], av["id"])
         keis["state"] = "accepted"
-        if av["id"] !== 5090964479 # if not owner of the group
+        if av["id"] !== 5090964479 # owner of the group
             unbanChatMember(chat_id = keis["group"].first,user_id = av["id"])
         end
     elseif av["txt"] == "Atmesti"
@@ -156,7 +156,7 @@ function closekeis(d, tg, av, k)
     av["step"]="0"
     if keis["state"] !== "accepted"
         keis["state"] = "closed"
-        sendMessage(tg, chat_id = av["id"], text = "Nepavyko rasti talkininko, galite bandyti dar kartą.")
+        sendMessage(tg, chat_id = av["id"], text = "Nepavyko rasti talkininko, bandykite dar kartą. | Не вдалося знайти допомогу, спробуйте ще раз.")
         tbegin(tg, av)
         return av
     end
@@ -168,9 +168,9 @@ function closekeis(d, tg, av, k)
     end
     av["token"] = av["token"]-1
     tfg = 1/(length(keis["giver"])+0.2)
-    sendMessage(tg, chat_id = av["id"], text = "Susitikimas uždarytas (jūsų taškų skaičius $(round(10*av["token"])/10)")
-    msg = "Ar talka buvo naudinga?"
-    k = [["Taip", "valuableyesno(1)", "Ne", "valuableyesno(0)"]]
+    sendMessage(tg, chat_id = av["id"], text = "Susitikimas uždarytas. | Зустріч закрита.") #(jūsų taškų skaičius $(round(10*av["token"])/10)")
+    msg = "Ar talka buvo naudinga? | Чи була допомога корисною?"
+    k = [["Taip | Так", "valuableyesno(1)", "Ne | Ні", "valuableyesno(0)"]]
     sendMessage(tg, chat_id = av["id"], text = msg, reply_markup = tik(k))
     for gid in keis["giver"]
         av = Av[gid]
@@ -179,7 +179,7 @@ function closekeis(d, tg, av, k)
             banChatMember(tg, chat_id = keis["group"].first, user_id = gid)
         end
         Av[gid]["token"] += tfg
-        sendMessage(tg, chat_id = gid, text = "Susitikimas uždarytas (jūsų taškų skaičius $(round(10*Av[gid]["token"])/10))")
+        sendMessage(tg, chat_id = gid, text = "Susitikimas uždarytas. | Зустріч закрита.") #(jūsų taškų skaičius $(round(10*Av[gid]["token"])/10))")
         tbegin(tg, av)
         # msg="Galima eiti į pradžią"
         # k=[["Į pradžią", "tbegin()"]]
