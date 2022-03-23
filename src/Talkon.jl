@@ -29,7 +29,6 @@ function initialize(datafile = "varTEST.data")
 end
 
 function talka(d::DataBase)
-    tg=TelegramClient("5228841059:AAHWYzBFbqM4TFYgURvmNRqc25dDywOlLJA")
     update_id = d.update_id
     av = nothing
     tg = TelegramClient()
