@@ -108,8 +108,10 @@ function dealkeis(d, tg, av)
             if avg["id"] !== 5090964479 # if not owner of the group
                 unbanChatMember(tg, chat_id = keis["group"].first, user_id = avg["id"])
             end
+        elseif avg["step"] !== "accepted"
+            return
         end
-        msg = "Aptarkit klausimą prisijungus prie grupės | Обговоріть проблему, приєднавшись до групи: $(keis["group"].second["link"])"
+        msg = "Aptarkit klausimą prisijungus prie grupės: | Обговоріть проблему, приєднавшись до групи: $(keis["group"].second["link"])"
         sendMessage(chat_id = av["id"], text = msg)
         push!(keis["giver"], av["id"])
         keis["state"] = "accepted"

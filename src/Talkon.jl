@@ -21,10 +21,6 @@ const DATAFILE = Ref("")
 function initialize(datafile = "varTEST.data")
     DATAFILE[] = datafile
     (T, Av, update_id, K, groups) = deserialize(datafile)
-    #delete!(Av,5001426828) # Tadas
-    #delete!(Av,1288201725) # Vidas
-    #delete!(Av,105485706) # Andrey
-    #delete!(Av,5090964479) # Talkininkas
     return DataBase(T, Av, update_id, K, groups)
 end
 
@@ -44,33 +40,10 @@ function talka(d::DataBase)
     end
 end # end of talka function
 
-function switcher(d, tg, av, inp)
-    if inp == "tenter()"
-        tenter(d, tg, av)
-    elseif inp == "trequest()"
-        trequest(d, tg, av)
-    elseif inp == "valuableyesno(0)"
-        valuableyesno(d, tg, av, 0)
-    elseif inp == "valuableyesno(1)"
-        valuableyesno(d, tg, av, 1)
-    elseif inp == "invitecodeyesno(0)"
-        invitecodeyesno(0)
-    elseif inp == "invitecodeyesno(1)"  
-        invitecodeyesno(1)   
-    elseif inp == "closekeis()"
-        av = closekeis(d, tg, av, av["requestid"])
-    elseif inp == ""
-    else
-        println("bad command!")
-    end
-
-    return av
-end
-
 function dothing(d::DataBase, tg, update_id, av)
     @unpack T, Av, K, groups = d
     mst = try
-        getUpdates(tg, offset = update_id + 1, allowed_updates = ["message", "callback_query"])
+        mst=getUpdates(tg, offset = update_id + 1, allowed_updates = ["message", "callback_query"])
     catch
         @warn "getUpdates doesnt work may be no connection?!"
         sleep(2)
@@ -143,5 +116,28 @@ function dothing(d::DataBase, tg, update_id, av)
     serialize(DATAFILE[], [T,Av,update_id,K,groups])
     return update_id, av
 end # end of dothing function
+
+function switcher(d, tg, av, inp)
+    if inp == "tenter()"
+        tenter(d, tg, av)
+    elseif inp == "trequest()"
+        trequest(d, tg, av)
+    elseif inp == "valuableyesno(0)"
+        valuableyesno(d, tg, av, 0)
+    elseif inp == "valuableyesno(1)"
+        valuableyesno(d, tg, av, 1)
+    elseif inp == "invitecodeyesno(0)"
+        invitecodeyesno(0)
+    elseif inp == "invitecodeyesno(1)"  
+        invitecodeyesno(1)   
+    elseif inp == "closekeis()"
+        av = closekeis(d, tg, av, av["requestid"])
+    elseif inp == ""
+    else
+        println("bad command!")
+    end
+
+    return av
+end
 
 end # module

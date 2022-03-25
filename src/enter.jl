@@ -1,6 +1,5 @@
 function tenter(d, tg, av)
     @unpack T = d
-
     av["step"] = "enter"
     pathkey = join(av["path"])
     if av["txt"] == "Pasirinkti"

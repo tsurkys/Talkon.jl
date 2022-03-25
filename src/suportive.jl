@@ -43,7 +43,7 @@ function tree(tg, av, T)
     return
 end
 
-function maketree(filename = "medis.txt")
+function maketree(filename = "tree.txt")
     mtxt = readlines(filename, keep = false)
     steps = ["0"]
     E = Dict("field"=>"0","children"=>[],"steps"=>deepcopy(steps),"dav_id"=>[])
