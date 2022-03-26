@@ -1,3 +1,4 @@
 [deps]
 ConfigEnv = "01234589-554d-41b7-ae5c-7b6ee2db6796"
+MiniLoggers = "93f3dd0f-005d-4452-894a-a31841fa4078"
 Talkon = "cf90de9e-ecfd-43df-a09c-d6a26c9799bd"

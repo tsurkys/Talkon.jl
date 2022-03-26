@@ -1,7 +1,7 @@
 name = "Talkon"
 uuid = "cf90de9e-ecfd-43df-a09c-d6a26c9799bd"
 authors = ["<TBD>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
