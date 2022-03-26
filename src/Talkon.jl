@@ -29,6 +29,7 @@ function talka(d::DataBase)
     av = nothing
     tg = TelegramClient()
     cnt = 0
+    @info "Talkon bot started"
     while true
         cnt += 1
         update_id, av = dothing(d, tg, update_id, av)
