@@ -14,6 +14,6 @@ In order to run bot, start `server/bot.jl`.
 
 It is possible to build minimal docker image.
 
-1. Create `.env` file in `server/` directory. Use `server/.env_template` as an example.
+1. Create `.env` file in `server/` directory. Use `server/env_template` as an example.
 2. run `docker build -t talkon .` in order to build image
 3. run `docker run talkon:latest` to start bot

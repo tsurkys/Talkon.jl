@@ -9,5 +9,5 @@ MiniLogger(minlevel = MiniLoggers.Debug,
 
 dotenv()
 
-db = initialize("varTEST.data")
+db = initialize(get(ENV, "TALKON_DATA_FILE", "varTEST.data"))
 talka(db)
