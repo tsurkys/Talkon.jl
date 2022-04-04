@@ -12,7 +12,7 @@ function trequest(d, tg, av) # participant iniciates a request
         else #if !haskey(av,"requestid") ||
             av["path"] = "0"
             av["step"] = "request"
-            msg = "Įrašykite klausimą. / Будь ласка, введіть запитання. / Пожалуйста, введите вопрос."
+            msg = "Įrašykite klausimą. | Введіть запитання. | Введите вопрос."
             sendMessage(tg, chat_id = av["id"], text = msg)
         end
         return
@@ -22,11 +22,11 @@ function trequest(d, tg, av) # participant iniciates a request
         tree(tg, av, T)
     elseif av["txt"] == "Pasirinkti" || av["txt"] == "Siųsti | Відправити"
         if av["txt"] == "Siųsti | Відправити"
-            keypath = "0Paslaugos | Послуги "
+            keypath = "0Paslaugos | Послуги"
         else
             while isempty(T[keypath]["dav_id"])
                 if length(T[keypath]["steps"])<2
-                    keypath = "0Paslaugos | Послуги "
+                    keypath = "0Paslaugos | Послуги"
                     break
                 else
                     keypath = join(T[keypath]["steps"][1:end-1])
@@ -43,14 +43,13 @@ function trequest(d, tg, av) # participant iniciates a request
         end
         keis["subject"] = subject
         keis["dav_id"] = T[keypath]["dav_id"]
-        keis["requested_id"] = []
         sendrequest(d, tg, av)
     elseif any(T[keypath]["children"] .== av["txt"])
         av["path"] = vcat(av["path"], av["txt"])
         tree(tg, av, T)
-    else #įvedamas užklausimo tekstas
+    else # The text of request was entered
         av["requestid"] = now()
-        K[av["requestid"]] = Dict("getter"=>av,"txt"=>deepcopy(av["txt"]),"giver"=>[],"state"=>"opened")
+        K[av["requestid"]] = Dict("getter"=>av,"txt"=>deepcopy(av["txt"]),"giver"=>[],"state"=>"opened","requested_id"=>[])
         msg = "Siūskite užklausimą iškart arba pasirinkite iš kurios srities klausimas. | Надішліть запит негайно або виберіть, з якої області запитати."
         k = [["Siųsti | Відправити","Parinkti | Виберіть"]]
         d = Dict(:keyboard => k, :one_time_keyboard => true, :resize_keyboard=>true)
@@ -79,6 +78,7 @@ function sendrequest(d::DataBase, tg, av) # the request is broadcasted
             sendMessage(tg, chat_id = id, text = msg, reply_markup = kb)
         catch
             println("Didn't manage to send to $id, $(Av[id]["first_name"])")
+            continue
         end
         Av[id]["step"] = "requested"
         Av[id]["getterid"] = av["id"]
@@ -115,7 +115,7 @@ function dealkeis(d, tg, av)
         sendMessage(chat_id = av["id"], text = msg)
         push!(keis["giver"], av["id"])
         keis["state"] = "accepted"
-        if av["id"] !== 5090964479 # owner of the group
+        if av["id"] !== 5090964479 # if not owner of the group
             unbanChatMember(chat_id = keis["group"].first,user_id = av["id"])
         end
     elseif av["txt"] == "Atmesti"

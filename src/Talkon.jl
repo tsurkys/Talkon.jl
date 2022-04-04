@@ -62,34 +62,22 @@ function dothing(d::DataBase, tg, update_id, av)
             av = Av[id]
             av["txt"] = "nothingness"
             av = switcher(d, tg, av, ms[:callback_query][:data])
-            #eval(Meta.parse(ms[:callback_query][:data]))
             chat_id = ms["callback_query"]["message"]["chat"]["id"]
             try
                 deleteMessage(chat_id = chat_id, message_id = ms["callback_query"]["message"]["message_id"])
             catch
             end
             continue
-        elseif haskey(ms["message"], "new_chat_member") 
-            #if ms["message"]["chat"]["id"] ==-1001715161879# development group. https://t.me/talkon_development
-            if ms["message"]["chat"]["id"] == -1001547960563 #message from main test group https://t.me/talka_ukrainai
-                if !haskey(Av, ms["message"]["new_chat_member"]["id"]) # new member entered main group 
-                    try
-                    av = newav(d, tg, av, ms) # register and wellcome message for a new member
-                    catch
-                        println("unsuccesfull registration upon entering main group")
-                    end
-                end
-                continue
-            end
-            promoteChatMember(chat_id = ms["message"]["chat"]["id"], #new member entered the temporary group
+        elseif haskey(ms["message"], "new_chat_member") # new member entered the temporary group, additional check for if it our group needed
+            promoteChatMember(chat_id = ms["message"]["chat"]["id"], 
                                 user_id = ms["message"]["new_chat_member"]["id"], can_manage_voice_chats = true)
-            continue
+                continue
         elseif !haskey(ms["message"],"text")
             println("unknown type of message")
             continue
         end
-        if !haskey(Av, ms["message"]["from"]["id"]) #new member called bot 
-            av = newav(d, tg, av, ms)
+        if !haskey(Av, ms["message"]["from"]["id"]) #new member addresed bot 
+            av = newav(d, tg, ms)
             continue
         end
         av = Av[ms["message"]["from"]["id"]]

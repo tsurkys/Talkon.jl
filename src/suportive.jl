@@ -35,7 +35,7 @@ function tree(tg, av, T)
         msg = string(T[pathkey]["descript"]," Išsirinkite sritį.")
     else
         field = av["path"][end]
-        msg = "Eikite atgal arba pasirinkite šią $field sritį."
+        msg = """Eikite atgal arba pasirinkite šią "$field" sritį."""
     end
     kb = Dict(:keyboard => ktree, :one_time_keyboard => true, :resize_keyboard=>true)
     sendMessage(tg, chat_id = av["id"], text = msg, reply_markup = kb)
@@ -78,7 +78,9 @@ function maketree(filename = "tree.txt")
     return T
 end
 
-function kas2nkas(name)
+function makedictionary()
+
+function kas2nkas(name) # changes endings of Lithuanian names
     d = Dict("as"=>"ai",'ė'=>"e","us"=>"au","ys"=>"y","is"=>"i","inkas"=>"inke")
     if length(name)>5 && haskey(d,name[end-4:end])
         nname=name[1:end-5]*d[name[end-4:end]]
@@ -91,7 +93,7 @@ function kas2nkas(name)
     end
 end
 
-function tik(k) #talka inline keyboard
+function tik(k) #talkon inline keyboard
     kb=[]
     for ki in k
         kl=[]
@@ -114,14 +116,14 @@ function getgroup(groups)
     print("not enought free rooms")
 end
 
-function taskai(tg)
+function taskai(tg) # now not used
     sendMessage(tg, chat_id = av["id"], text = "Jūsų taškų skaičius $(round(10*av["token"])/10)")
 end
 
 function cleanK(d::DataBase)
     (T, Av, updateId, K, groups) = deserialize(DATAFILE[])
     d.K = Dict(now() => Dict("getter" => Av[5090964479], "txt"=>"refresh",
-                             "giver"=>[1], "state"=>"nothing"))
+                             "giver"=>[1], "state"=>"nothing","requested_id"=>[]))
     serialize(DATAFILE[], [T, Av, updateId, K, groups])
 end
 
