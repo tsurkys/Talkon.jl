@@ -1,8 +1,8 @@
-function valuableyesno(d, tg, av, yn)
-    @unpack K = d
-    K[av["requestid"]]["valuableyesno"] = yn
+function valuableyesno(d, tg, mb, yn)
+    @unpack keises = d
+    keises[mb["requestid"]]["valuableyesno"] = yn
     if yn == 1
-        # sendInvoice(chat_id = av["id"],
+        # sendInvoice(chat_id = mb["id"],
         #             title = "Talka",
         #             description = "Prisidėk prie platformos kūrimo!",
         #             payload = "payloadas",
@@ -11,7 +11,7 @@ function valuableyesno(d, tg, av, yn)
         #             prices = [Dict("label"=>"kaina","amount"=>100)],
         #     suggested_tip_amounts = [100,200,300], max_tip_amount=500)
         msg = "Ми раді! | Džiaugiamės!"
-        sendMessage(tg, chat_id = av["id"], text = msg)
+        sendMessage(tg, chat_id = mb["id"], text = msg)
     end
-    tbegin(tg, av)
+    tbegin(tg, mb)
 end

@@ -20,48 +20,57 @@ const DATAFILE = Ref("")
 
 function initialize(datafile = "varTEST.data")
     DATAFILE[] = datafile
-    (T, Av, update_id, K, groups) = deserialize(datafile)
-    return DataBase(T, Av, update_id, K, groups)
+    (tree, mbs, update_id, keises, groups) = deserialize(datafile)
+    return DataBase(tree, mbs, update_id, keises, groups)
 end
+#=
+tree - problem area tree
+mbs - members
+    mb - member
+update_id - telegram update_id
+keises - requests cases
+    keis - request case
+groups - temporary groups
+=#
 
 function talka(d::DataBase)
     update_id = d.update_id
-    av = nothing
+    mb = nothing
     tg = TelegramClient()
     cnt = 0
     while true
         cnt += 1
-        update_id, av = dothing(d, tg, update_id, av)
+        update_id, mb = dothing(d, tg, update_id, mb)
         d.update_id = update_id
         if cnt == 20
-            av = chekeis(d, tg, av)
+            mb = chekeis(d, tg, mb)
             cnt = 0
         end
     end
 end # end of talka function
 
-function dothing(d::DataBase, tg, update_id, av)
-    @unpack T, Av, K, groups = d
+function dothing(d::DataBase, tg, update_id, mb)
+    @unpack tree, mbs, keises, groups = d
     mst = try
         mst=getUpdates(tg, offset = update_id + 1, allowed_updates = ["message", "callback_query"])
     catch
         @warn "getUpdates doesnt work may be no connection?!"
         sleep(2)
-        return update_id, av
+        return update_id, mb
     end
     if length(mst) > 1
         print("length of the message $(length(mst))")
     elseif length(mst) == 0
         sleep(1)
-        return update_id, av
+        return update_id, mb
     end
     update_id = mst[end]["update_id"]
     for ms in mst
         if haskey(ms, "callback_query") #messages that have callback string
             id = ms["callback_query"]["from"]["id"]
-            av = Av[id]
-            av["txt"] = "nothingness"
-            av = switcher(d, tg, av, ms[:callback_query][:data])
+            mb = mbs[id]
+            mb["txt"] = "nothingness"
+            mb = switcher(d, tg, mb, ms[:callback_query][:data])
             chat_id = ms["callback_query"]["message"]["chat"]["id"]
             try
                 deleteMessage(chat_id = chat_id, message_id = ms["callback_query"]["message"]["message_id"])
@@ -76,56 +85,56 @@ function dothing(d::DataBase, tg, update_id, av)
             println("unknown type of message")
             continue
         end
-        if !haskey(Av, ms["message"]["from"]["id"]) #new member addresed bot 
-            av = newav(d, tg, ms)
+        if !haskey(mbs, ms["message"]["from"]["id"]) #new member addresed bot 
+            mb = newav(d, tg, ms)
             continue
         end
-        av = Av[ms["message"]["from"]["id"]]
+        mb = mbs[ms["message"]["from"]["id"]]
         ReplyKeyboardRemove = Dict(:remove_keyboard => true)
-        sentms = sendMessage(chat_id = av["id"], text = "entered", reply_markup = ReplyKeyboardRemove)  # sendMessage always require text message,
-        deleteMessage(chat_id = av["id"],message_id = sentms["message_id"]) # in this case it has to be deleted
-        av["txt"]=replace(ms["message"]["text"],"✓"=>"") # curently tree is represented not with inline keyboard, thus the text message arrives
-        if lowercase(av["txt"]) == "namo | додому" || av["txt"] == "/start" || av["txt"] == "/namo"
-            tbegin(tg, av)
-        #elseif av["txt"] == "/pakviesti" #invite new member, perhaps to help refugees it is not very usefull
+        sentms = sendMessage(chat_id = mb["id"], text = "entered", reply_markup = ReplyKeyboardRemove)  # sendMessage always require text message,
+        deleteMessage(chat_id = mb["id"],message_id = sentms["message_id"]) # in this case it has to be deleted
+        mb["txt"]=replace(ms["message"]["text"],"✓"=>"") # curently tree is represented not with inline keyboard, thus the text message arrives
+        if lowercase(mb["txt"]) == "namo | додому" || mb["txt"] == "/start" || mb["txt"] == "/namo"
+            tbegin(tg, mb)
+        #elseif mb["txt"] == "/pakviesti" #invite new member, perhaps to help refugees it is not very usefull
         #    invite()
-        #elseif av["txt"] == "/taskai"
+        #elseif mb["txt"] == "/taskai"
         #    taskai()
-        #elseif av["step"] == "wait_for_invite_code"
+        #elseif mb["step"] == "wait_for_invite_code"
         #    registerinvitecode()
-        elseif av["step"] == "request"
-            trequest(d, tg, av)
-        elseif av["step"] == "enter"
-            tenter(d, tg, av)
-        elseif av["step"] == "requested" || av["step"] == "accepted"
-            dealkeis(d, tg, av)
+        elseif mb["step"] == "request"
+            trequest(d, tg, mb)
+        elseif mb["step"] == "enter"
+            tenter(d, tg, mb)
+        elseif mb["step"] == "requested" || mb["step"] == "accepted"
+            dealkeis(d, tg, mb)
         end
     end # end of for ms
-    serialize(DATAFILE[], [T,Av,update_id,K,groups])
-    return update_id, av
+    serialize(DATAFILE[], [tree,mbs,update_id,keises,groups])
+    return update_id, mb
 end # end of dothing function
 
-function switcher(d, tg, av, inp)
+function switcher(d, tg, mb, inp)
     if inp == "tenter()"
-        tenter(d, tg, av)
+        tenter(d, tg, mb)
     elseif inp == "trequest()"
-        trequest(d, tg, av)
+        trequest(d, tg, mb)
     elseif inp == "valuableyesno(0)"
-        valuableyesno(d, tg, av, 0)
+        valuableyesno(d, tg, mb, 0)
     elseif inp == "valuableyesno(1)"
-        valuableyesno(d, tg, av, 1)
+        valuableyesno(d, tg, mb, 1)
     elseif inp == "invitecodeyesno(0)"
         invitecodeyesno(0)
     elseif inp == "invitecodeyesno(1)"  
         invitecodeyesno(1)   
     elseif inp == "closekeis()"
-        av = closekeis(d, tg, av, av["requestid"])
+        mb = closekeis(d, tg, mb, mb["requestid"])
     elseif inp == ""
     else
         println("bad command!")
     end
 
-    return av
+    return mb
 end
 
 end # module

@@ -1,18 +1,18 @@
-function tree(tg, av, T)
-    if av["txt"] == "Atgal | Повернутися"
-        if av["path"][end] == "0"
-            tbegin(tg, av)
+function tree(tg, mb, tree)
+    if mb["txt"] == "Atgal | Повернутися"
+        if mb["path"][end] == "0"
+            tbegin(tg, mb)
             return
         else
-            av["path"] = av["path"][1:end-1]
+            mb["path"] = mb["path"][1:end-1]
         end
     end
-    pathkey = join(av["path"])
-    ch = T[pathkey]["children"]
+    pathkey = join(mb["path"])
+    ch = tree[pathkey]["children"]
     children = []
     ktree = [[]]
     for i in 1:length(ch)
-        if any(T[string(pathkey,ch[i])]["dav_id"] .== av["id"])
+        if any(tree[string(pathkey,ch[i])]["dav_id"] .== mb["id"])
             push!(children,string(ch[i],"✓"))
         else
             push!(children,ch[i])
@@ -25,20 +25,20 @@ function tree(tg, av, T)
             push!(ktree,[children[i]])
         end
     end
-    if any(T[pathkey]["dav_id"] .== av["id"]) && av["step"] == "enter"
+    if any(tree[pathkey]["dav_id"] .== mb["id"]) && mb["step"] == "enter"
         push!(ktree,["Atgal | Повернутися","Nuimti žymę","Namo | Додому"])
     else
         push!(ktree,["Atgal | Повернутися","Pasirinkti","Namo | Додому"])
     end
     popfirst!(ktree)
     if length(ktree) > 1
-        msg = string(T[pathkey]["descript"]," Išsirinkite sritį.")
+        msg = string(tree[pathkey]["descript"]," Išsirinkite sritį.")
     else
-        field = av["path"][end]
+        field = mb["path"][end]
         msg = """Eikite atgal arba pasirinkite šią "$field" sritį."""
     end
     kb = Dict(:keyboard => ktree, :one_time_keyboard => true, :resize_keyboard=>true)
-    sendMessage(tg, chat_id = av["id"], text = msg, reply_markup = kb)
+    sendMessage(tg, chat_id = mb["id"], text = msg, reply_markup = kb)
 
     return
 end
@@ -47,7 +47,7 @@ function maketree(filename = "tree.txt")
     mtxt = readlines(filename, keep = false)
     steps = ["0"]
     E = Dict("field"=>"0","children"=>[],"steps"=>deepcopy(steps),"dav_id"=>[])
-    T = Dict("0"=>Dict("field"=>"0","children"=>[],"steps"=>deepcopy(steps),"dav_id"=>[],"descript"=>""))
+    tree = Dict("0"=>Dict("field"=>"0","children"=>[],"steps"=>deepcopy(steps),"dav_id"=>[],"descript"=>""))
     lv = 0
     for i in 1:length(mtxt)
         it = findall("\t", mtxt[i])
@@ -61,21 +61,21 @@ function maketree(filename = "tree.txt")
         y = length(it)+1
         if y>lv
             step = join(steps)
-            T[step]["children"] = eil
+            tree[step]["children"] = eil
             append!(steps,[eil])
         elseif y<= lv
             steps = steps[1:end+y-lv]
             steps[end] = eil
-            T[join(steps[1:end-1])]["children"] = vcat(T[join(steps[1:end-1])]["children"],eil)
+            tree[join(steps[1:end-1])]["children"] = vcat(tree[join(steps[1:end-1])]["children"],eil)
         end
         step = join(steps)
-        T[step] = deepcopy(E)
-        T[step]["field"] = eil
-        T[step]["steps"] = deepcopy(steps)
-        T[step]["descript"] = descript
+        tree[step] = deepcopy(E)
+        tree[step]["field"] = eil
+        tree[step]["steps"] = deepcopy(steps)
+        tree[step]["descript"] = descript
         lv = y
     end
-    return T
+    return tree
 end
 
 function makedictionary()
@@ -117,20 +117,20 @@ function getgroup(groups)
 end
 
 function taskai(tg) # now not used
-    sendMessage(tg, chat_id = av["id"], text = "Jūsų taškų skaičius $(round(10*av["token"])/10)")
+    sendMessage(tg, chat_id = mb["id"], text = "Jūsų taškų skaičius $(round(10*mb["token"])/10)")
 end
 
 function cleanK(d::DataBase)
-    (T, Av, updateId, K, groups) = deserialize(DATAFILE[])
-    d.K = Dict(now() => Dict("getter" => Av[5090964479], "txt"=>"refresh",
+    (tree, mbs, updateId, keises, groups) = deserialize(DATAFILE[])
+    d.keises = Dict(now() => Dict("getter" => mbs[5090964479], "txt"=>"refresh",
                              "giver"=>[1], "state"=>"nothing","requested_id"=>[]))
-    serialize(DATAFILE[], [T, Av, updateId, K, groups])
+    serialize(DATAFILE[], [tree, mbs, updateId, keises, groups])
 end
 
 function cleanT()
-    (T,Av,updateId,K,groups) = deserialize(DATAFILE[])
-    ak=keys(Av)
-    for t in T
+    (tree,mbs,updateId,keises,groups) = deserialize(DATAFILE[])
+    ak=keys(mbs)
+    for t in tree
         v=[]
         for i in 1:length(t.second["dav_id"])
             if !any(ak.==t.second["dav_id"][i])
@@ -140,6 +140,6 @@ function cleanT()
         deleteat!(t.second["dav_id"],v)
         t.second["dav_id"]=union(t.second["dav_id"])
     end
-    serialize(DATAFILE[], [T,Av,updateId,K,groups])
-    print("T išvalytas2")
+    serialize(DATAFILE[], [tree,mbs,updateId,keises,groups])
+    print("tree išvalytas2")
 end
