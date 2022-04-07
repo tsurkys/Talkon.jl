@@ -1,36 +1,36 @@
-function tenter(d, tg, av)
-    @unpack T = d
-    av["step"] = "enter"
-    pathkey = join(av["path"])
-    if av["txt"] == "Pasirinkti"
-        for k in keys(T)
+function tenter(d, tg, mb)
+    @unpack tree = d
+    mb["step"] = "enter"
+    pathkey = join(mb["path"])
+    if mb["txt"] == "Pasirinkti"
+        for k in keys(tree)
             if contains(k, pathkey)
-                if !any(av["id"] .== T[k]["dav_id"])
-                    push!(T[k]["dav_id"], av["id"])
+                if !any(mb["id"] .== tree[k]["dav_id"])
+                    push!(tree[k]["dav_id"], mb["id"])
                 end
             end
         end
-        if !(av["path"][end]=="0")
-            av["path"] = av["path"][1:end-1]
+        if !(mb["path"][end]=="0")
+            mb["path"] = mb["path"][1:end-1]
         end
-    elseif av["txt"] == "Nuimti žymę"
-        for k in keys(T)
+    elseif mb["txt"] == "Nuimti žymę"
+        for k in keys(tree)
             if contains(k,pathkey)
-                i = findlast(av["id"] .== T[k]["dav_id"])
+                i = findlast(mb["id"] .== tree[k]["dav_id"])
                 if i !== nothing
-                    popat!(T[k]["dav_id"], i)
+                    popat!(tree[k]["dav_id"], i)
                 end
             end
         end
-        if !(av["path"][end]=="0")
-            av["path"] = av["path"][1:end-1]
+        if !(mb["path"][end]=="0")
+            mb["path"] = mb["path"][1:end-1]
         end
-    elseif any(T[pathkey]["children"] .== av["txt"])
-        av["path"] = vcat(av["path"], av["txt"])
-    elseif !(av["txt"] == "Atgal | Повернутися")
+    elseif any(tree[pathkey]["children"] .== mb["txt"])
+        mb["path"] = vcat(mb["path"], mb["txt"])
+    elseif !(mb["txt"] == "Atgal | Повернутися")
         #@warn "Netinkama įvestis"
     end
-    tree(tg, av, T)
+    tree(tg, mb, tree)
 
     return
 end
