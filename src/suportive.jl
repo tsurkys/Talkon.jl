@@ -1,86 +1,66 @@
-function tree(tg, mb, tree)
-    if mb["txt"] == "Atgal | Повернутися"
-        if mb["path"][end] == "0"
-            tbegin(tg, mb)
-            return
+function traversetree(d::DataBase, mb, pathkey)
+    local keyboard
+    @unpack tree = d
+    mb["path"] = deepcopy(tree[pathkey]["path"])
+    if mb["step"] == "enter" && isempty(tree[pathkey]["children"]) # if final branch then action of selection comes in
+        if !any(tree[pathkey]["dav_id"] .== mb["id"])
+            tenter(d, mb, "select")
         else
-            mb["path"] = mb["path"][1:end-1]
+            tenter(d, mb, "unselect")
         end
+        return
     end
-    pathkey = join(mb["path"])
-    ch = tree[pathkey]["children"]
-    children = []
-    ktree = [[]]
-    for i in 1:length(ch)
-        if any(tree[string(pathkey,ch[i])]["dav_id"] .== mb["id"])
-            push!(children,string(ch[i],"✓"))
+    i=1
+    keyboard=[[]]
+    for child in tree[pathkey]["children"] # formation of keyboard out of the children
+        chpathkey = string(pathkey,child)
+        txt = tree[chpathkey]["field"][mb["ln"]]
+        !isempty(tree[chpathkey]["children"]) ? txt = txt * ".." : nothing
+        if any(tree[chpathkey]["dav_id"] .== mb["id"]) && mb["step"] == "enter"
+            txt = txt * " ✓"
+        end
+        if !iseven(i) || length(txt)>20 
+            push!(keyboard,[txt,"traversetree(),$chpathkey"])
         else
-            push!(children,ch[i])
+            push!(keyboard[end],txt,"traversetree(),$chpathkey")
         end
+        i+=1
     end
-    for i in 1:2:length(children)
-        if (length(children)-i) > 0
-            push!(ktree,children[i:i+1])
-        else
-            push!(ktree,[children[i]])
-        end
-    end
-    if any(tree[pathkey]["dav_id"] .== mb["id"]) && mb["step"] == "enter"
-        push!(ktree,["Atgal | Повернутися","Nuimti žymę","Namo | Додому"])
+    popfirst!(keyboard)
+    # next additional keyboar keys
+    if pathkey != "0"
+        backpathkey = join(tree[pathkey]["path"][1:end-1])
     else
-        push!(ktree,["Atgal | Повернутися","Pasirinkti","Namo | Додому"])
+        backpathkey = pathkey
     end
-    popfirst!(ktree)
-    if length(ktree) > 1
-        msg = string(tree[pathkey]["descript"]," Išsirinkite sritį.")
+    if mb["step"] == "enter"
+        if any(tree[pathkey]["dav_id"] .== mb["id"])
+           kbl=[dc("tree_unselect", mb),"tenter(),unselect"]
+        else
+           kbl=[dc("tree_select", mb),"tenter(),select"]
+        end
     else
-        field = mb["path"][end]
-        msg = """Eikite atgal arba pasirinkite šią "$field" sritį."""
+        kbl=[dc("tree_send", mb),"propagate()"]
     end
-    kb = Dict(:keyboard => ktree, :one_time_keyboard => true, :resize_keyboard=>true)
-    sendMessage(tg, chat_id = mb["id"], text = msg, reply_markup = kb)
-
-    return
+    push!(keyboard,[dc("tree_back", mb),"traversetree(),$backpathkey",
+                    kbl[1],kbl[2],
+                    dc("tree_home", mb),"tbegin()"])
+    if pathkey == "0"
+        deleteat!(keyboard[end],[1,2])
+    end                    
+    if !isempty(tree[pathkey]["children"])
+        msg = string(tree[pathkey]["descript"][mb["ln"]],dc("tree_choose_area", mb))
+    else
+        msg = string(tree[pathkey]["descript"][mb["ln"]],
+                     dc("tree_go_back_or _choose_this_1", mb),
+                     tree[pathkey]["field"][mb["ln"]],
+                     dc("tree_go_back_or _choose_this_2", mb))
+    end
+    sendMessage(chat_id = mb["id"], text = msg, reply_markup = tik(keyboard))
 end
 
-function maketree(filename = "tree.txt")
-    mtxt = readlines(filename, keep = false)
-    steps = ["0"]
-    E = Dict("field"=>"0","children"=>[],"steps"=>deepcopy(steps),"dav_id"=>[])
-    tree = Dict("0"=>Dict("field"=>"0","children"=>[],"steps"=>deepcopy(steps),"dav_id"=>[],"descript"=>""))
-    lv = 0
-    for i in 1:length(mtxt)
-        it = findall("\t", mtxt[i])
-        eile = mtxt[i][length(it)+1:end]
-        if '/' in eile
-            (eil,descript) = split(eile,'/')
-        else
-            eil = eile
-            descript = ""
-        end
-        y = length(it)+1
-        if y>lv
-            step = join(steps)
-            tree[step]["children"] = eil
-            append!(steps,[eil])
-        elseif y<= lv
-            steps = steps[1:end+y-lv]
-            steps[end] = eil
-            tree[join(steps[1:end-1])]["children"] = vcat(tree[join(steps[1:end-1])]["children"],eil)
-        end
-        step = join(steps)
-        tree[step] = deepcopy(E)
-        tree[step]["field"] = eil
-        tree[step]["steps"] = deepcopy(steps)
-        tree[step]["descript"] = descript
-        lv = y
-    end
-    return tree
-end
-
-function makedictionary()
-
-function kas2nkas(name) # changes endings of Lithuanian names
+# Changes endings of Lithuanian names
+function kas2nkas(name)
     d = Dict("as"=>"ai",'ė'=>"e","us"=>"au","ys"=>"y","is"=>"i","inkas"=>"inke")
     if length(name)>5 && haskey(d,name[end-4:end])
         nname=name[1:end-5]*d[name[end-4:end]]
@@ -93,6 +73,44 @@ function kas2nkas(name) # changes endings of Lithuanian names
     end
 end
 
+function getgroup(groups)
+    for group in groups
+        if group.second["state"]=="free"
+            return group
+        end
+    end
+
+    print("not enough free rooms")
+end
+
+function get_tokens(mb) 
+    sendms(string(dc("get_tokens_your_ammount", mb), (round(10*mb["token"])/10)), mb)
+end
+
+function sendms(frase = "enter", mb = nothing; ln = nothing, chat_id = nothing, keyboard = nothing)
+    global DLN
+    if mb === nothing
+        ln = "en"
+    end
+    if ln === nothing
+        ln = mb["ln"]
+    end
+    if chat_id === nothing
+        chat_id = mb["id"]
+    end 
+    if haskey(DLN, frase)
+        text = DLN[frase][ln]
+    else
+        text = frase
+    end       
+    if keyboard === nothing
+        ms = sendMessage(chat_id = chat_id, text = text)
+    else
+        ms = sendMessage(chat_id = chat_id, text = text, reply_markup = tik(keyboard))
+    end
+    ms
+end
+
 function tik(k) #talkon inline keyboard
     kb=[]
     for ki in k
@@ -102,44 +120,10 @@ function tik(k) #talkon inline keyboard
         end
         push!(kb,kl)
     end
-    d=Dict(:inline_keyboard => kb)
-    return d
+    Dict(:inline_keyboard => kb)
 end
 
-function getgroup(groups)
-    for group in groups
-        if group.second["state"]=="free"
-            return group
-        end
-    end
-
-    print("not enought free rooms")
-end
-
-function taskai(tg) # now not used
-    sendMessage(tg, chat_id = mb["id"], text = "Jūsų taškų skaičius $(round(10*mb["token"])/10)")
-end
-
-function cleanK(d::DataBase)
-    (tree, mbs, updateId, keises, groups) = deserialize(DATAFILE[])
-    d.keises = Dict(now() => Dict("getter" => mbs[5090964479], "txt"=>"refresh",
-                             "giver"=>[1], "state"=>"nothing","requested_id"=>[]))
-    serialize(DATAFILE[], [tree, mbs, updateId, keises, groups])
-end
-
-function cleanT()
-    (tree,mbs,updateId,keises,groups) = deserialize(DATAFILE[])
-    ak=keys(mbs)
-    for t in tree
-        v=[]
-        for i in 1:length(t.second["dav_id"])
-            if !any(ak.==t.second["dav_id"][i])
-                push!(v,i)
-            end
-        end
-        deleteat!(t.second["dav_id"],v)
-        t.second["dav_id"]=union(t.second["dav_id"])
-    end
-    serialize(DATAFILE[], [tree,mbs,updateId,keises,groups])
-    print("tree išvalytas2")
+function dc(frase, mb)
+    global DLN
+    DLN[frase][mb["ln"]]
 end

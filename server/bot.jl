@@ -3,5 +3,6 @@ using ConfigEnv
 
 dotenv()
 
-db = initialize("varTEST.data")
+db = initialize("data/varTEST.data")
+
 talka(db)

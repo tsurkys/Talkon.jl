@@ -1,8 +1,8 @@
-function tenter(d, tg, mb)
+function tenter(d, mb, action)
     @unpack tree = d
     mb["step"] = "enter"
     pathkey = join(mb["path"])
-    if mb["txt"] == "Pasirinkti"
+    if action == "select"
         for k in keys(tree)
             if contains(k, pathkey)
                 if !any(mb["id"] .== tree[k]["dav_id"])
@@ -10,10 +10,7 @@ function tenter(d, tg, mb)
                 end
             end
         end
-        if !(mb["path"][end]=="0")
-            mb["path"] = mb["path"][1:end-1]
-        end
-    elseif mb["txt"] == "Nuimti žymę"
+    elseif action == "unselect"
         for k in keys(tree)
             if contains(k,pathkey)
                 i = findlast(mb["id"] .== tree[k]["dav_id"])
@@ -22,15 +19,11 @@ function tenter(d, tg, mb)
                 end
             end
         end
-        if !(mb["path"][end]=="0")
-            mb["path"] = mb["path"][1:end-1]
-        end
-    elseif any(tree[pathkey]["children"] .== mb["txt"])
-        mb["path"] = vcat(mb["path"], mb["txt"])
-    elseif !(mb["txt"] == "Atgal | Повернутися")
-        #@warn "Netinkama įvestis"
+    else
     end
-    tree(tg, mb, tree)
-
-    return
+    if isempty(tree[pathkey]["children"])
+        mb["path"] = mb["path"][1:end-1]
+        pathkey = join(mb["path"])
+    end
+    traversetree(d, mb, pathkey)
 end
