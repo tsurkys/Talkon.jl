@@ -7,8 +7,9 @@ Bot for mutual help
 
 We will create a Telegram bot dedicated to helping refugees from Ukraine. Volunteers will register and enter the type of help they can provide, the spoken languages, their location or any other relevant information. The refugee, or their assistant, will formulate and assign the type of problem, and the bot would send the requests to the relevant people. After accepting the request, volunteers and the refugee using the bot would be connected to a temporary group for a chat or audio/video call to discuss the problem.
 
-
 In order to run bot, start `server/bot.jl`.
+
+Curently syncing with gihub is paused, please contact PM.
 
 # Docker version
 
