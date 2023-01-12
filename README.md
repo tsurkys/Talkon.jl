@@ -9,7 +9,7 @@ We will create a Telegram bot dedicated to helping refugees from Ukraine. Volunt
 
 In order to run bot, start `server/bot.jl`.
 
-Curently syncing with gihub is paused, please contact PM.
+Curently syncing with github is paused, please contact PM.
 
 # Docker version
 
